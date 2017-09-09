@@ -1,28 +1,41 @@
-//Jquery works here
+var old_scroll_top = 0;
+var viewportHeight = $(window).height();
 
+$(document).scroll(()=>{
+	var current_scroll_top = $(window).scrollTop();
+    var scroll_delta = current_scroll_top - old_scroll_top;
 
-// $("abbr.livetimestamp").hide();
+    //if user scrolls more than the current scroll position
+	if (current_scroll_top >= (viewportHeight/2)+old_scroll_top){
+    	main();
+  	}
+    
+  	if(old_scroll_top <= current_scroll_top){
+    old_scroll_top = current_scroll_top;
+	}	
+});
 
-// $("abbr.livetimestamp").on('click', '*', function(event) {
-//      window.alert(' ID of element- testing'); 
-//     window.alert(' ID of element=' + $(this).attr('id'));  // Get ID attribute
-//     window.alert(' ID of Parent element=' + $(this).parent().attr('id'));
-// });
+function main(){
+	$('abbr.livetimestamp').css("color", "red");
+  	$('abbr.livetimestamp').attr("title", "Right click to add to the RedList!");
 
-$('abbr.livetimestamp').on('click', function(e){
-	e.preventDefault();
-	var url = "https://www.facebook.com"+$(this).parent("a").attr('href')
-	alert(url);
+    $('abbr.livetimestamp').mousedown(function(e){
+        if(e.which == 3){
+        e.preventDefault();
+        var url = "https://www.facebook.com"+$(this).parent("a").attr('href');
+        alert(url);
+        }       
+    });
 
-	// $.ajax({
+    //var data = { postURL: url }
+
+ 	// $.ajax({
 	// type: "POST",
 	// url: "http://188.166.214.237/api/v1/sendPost",
 	// data: data,
-	// success: success,
+	// success: function(){
+
+	// },
 	// dataType: "JSON"
-	// });
-});
-
-
-
-alert("RedList Chrome Extension is loaded.");
+	// });	
+}

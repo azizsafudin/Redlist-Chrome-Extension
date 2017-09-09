@@ -10,10 +10,10 @@
       "16": "ext_16.png",
       "48": "ext_48.png",
       "128": "ext_128.png" 
-    },  
-  
+    },
+
   "background": {
-    "scripts": ["background.js"]
+      "scripts": ["background.js"]
   },
   
   "content_scripts": [
