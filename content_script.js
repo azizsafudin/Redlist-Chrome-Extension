@@ -6,7 +6,7 @@ $(document).scroll(()=>{
     var scroll_delta = current_scroll_top - old_scroll_top;
 
     //if user scrolls more than the current scroll position
-	if (current_scroll_top >= (viewportHeight/2)+old_scroll_top){
+	if (current_scroll_top >= 400+old_scroll_top){
     	main();
   	}
     
@@ -15,10 +15,27 @@ $(document).scroll(()=>{
 	}	
 });
 
-function main(){
-	$('abbr.livetimestamp').css("color", "red");
-  	$('abbr.livetimestamp').attr("title", "Right click to add to the RedList!");
+$(document).ready(()=>{
+	main();
+})
 
+function main(){
+  	$('abbr.livetimestamp')
+  	.attr("title", "Right click to add to the List!")
+  	.css("font-weight", "bold")
+  	.css("color", "red");
+
+  	$('abbr.livetimestamp').hover(
+    function() {
+        var $this = $(this); // caching $(this)
+        $this.data('initialText', $this.text());
+        $this.text("Add to the List!");
+    },
+    function() {
+        var $this = $(this); // caching $(this)
+        $this.text($this.data('initialText'));
+    }
+);
     $('abbr.livetimestamp').mousedown(function(e){
         if(e.which == 3){
         e.preventDefault();
