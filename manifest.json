@@ -1,0 +1,26 @@
+{
+  "manifest_version": 2,
+
+  "name": "The Redlist",
+  "description": "Protecting our Friendly Animals",
+  "version": "0.0.1",
+  
+  "icons": 
+    {
+      "16": "ext_16.png",
+      "48": "ext_48.png",
+      "128": "ext_128.png" 
+    },  
+  
+  "background": {
+    "scripts": ["background.js"]
+  },
+  
+  "content_scripts": [
+    {
+      "matches": ["https://www.facebook.com/*", "http://www.facebook.com/*"],
+      "js": ["jquery.min.js", "content_script.js"],
+      "run_at": "document_end"
+    }
+  ]
+}
