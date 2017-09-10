@@ -13,9 +13,17 @@
     },
 
   "background": {
-      "scripts": ["background.js"]
+    "scripts": ["background.js"],
+    "persistent": true
   },
-  
+  "page_action" :
+  {
+    "default_icon" : "ext_48.png",
+    "default_title" : "Load RedList Extension!"
+  },
+  "permissions" : [
+    "declarativeContent", "storage"
+  ],
   "content_scripts": [
     {
       "matches": ["https://www.facebook.com/*", "http://www.facebook.com/*"],
