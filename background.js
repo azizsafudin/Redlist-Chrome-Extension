@@ -22,3 +22,9 @@ chrome.runtime.onInstalled.addListener(function() {
     ]);
   });
 });
+
+chrome.pageAction.onClicked.addListener(function(tab){
+  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.update(tabs[0].id, {url: tabs[0].url});
+    });
+});

@@ -22,7 +22,7 @@
     "default_title" : "Load RedList Extension!"
   },
   "permissions" : [
-    "declarativeContent", "storage"
+    "declarativeContent", "storage", "tabs"
   ],
   "content_scripts": [
     {

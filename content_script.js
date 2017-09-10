@@ -2,6 +2,9 @@ var old_scroll_top = 0;
 var viewportHeight = $(window).height();
 var latest_list = [];
 
+//TODO: Set site_name from URL in tabs, not hardcoded.
+var site_name   = "facebook";
+
 $(document).scroll(()=>{
 	var current_scroll_top = $(window).scrollTop();
   var scroll_delta = current_scroll_top - old_scroll_top;
@@ -18,8 +21,10 @@ $(document).scroll(()=>{
 
 $(document).ready(()=>{
 
-    $("abbr.livetimestamp").prepend("&#9762; ");  
-    
+    $("abbr.livetimestamp").prepend("&#9762; ")
+    .attr("title", "Click Redlist icon in the toolbar to reload!");
+;  
+
     //update latest_list on ready.
     chrome.storage.sync.get("list", function(items) {
       latest_list = JSON.parse(items.list);
@@ -48,14 +53,31 @@ function main(){
 
 
     $("abbr.livetimestamp").mousedown(function(e){
+
+        //Right Click
         if(e.which == 3){
         e.preventDefault();
 
+        //get URL of post/comment/reply.
         var url = "https://www.facebook.com"+$(this).parent("a").attr("href");
-        var new_obj = { "full_url": url.toString() }
+
+        //retrieve data from URL string.
+        var fb_data = processURL(url, site_name);
+
+        //constructing new object to add to the list.
+          var new_obj = { 
+            "full_url"          : url.toString(),
+            "post_id"           : fb_data[0],
+            "comment_id"        : fb_data[1],
+            "reply_comment_id"  : fb_data[2]
+          }
+
+
+        //new_obj = clean(new_obj);
+
         var push = true;
         //loop through list to check if object already exists
-        latest_list.forEach( function(arrayItem)
+        latest_list.forEach(function(arrayItem)
           {
             if(arrayItem.full_url == new_obj.full_url)
             {
@@ -80,50 +102,57 @@ function main(){
 
         //middle click to get stored item.
         if(e.which == 2){
-        chrome.storage.sync.get("list", function(items) {
-          alert(items.list.toString());
-          console.log(items.list.toString());
-        });
+          retrieveList();
         }       
     });
-
-  //setInterval(function(){location.reload(true);}, 60000);
-
-  //var data = { postURL: url }
-
- 	// $.ajax({
-	// type: "POST",
-	// url: "http://188.166.214.237/api/v1/sendPost",
-	// data: data,
-	// success: function(){
-
-	// },
-	// dataType: "JSON"
-	// });	
 }
 
+function retrieveList(){
+  chrome.storage.sync.get("list", function(items) {
+    alert(items.list.toString());
+    console.log(items.list.toString());
+  });
+}
+
+function processURL(url_str, site){
+  var url_obj = new URL(url_str);
+  var arr = [];
+
+  //process URL for facebook
+  if(site == "facebook"){
+    var split = url_str.split("posts/")[1];
+    var post_id = split.split("?")[0];
+
+    arr[0] = post_id;
+    arr[1] = url_obj.searchParams.get("comment_id");
+    arr[2] = url_obj.searchParams.get("reply_comment_id");
+
+    return arr;
+  }
+  return arr;
+}
 
 //Code to reload page when idle.
-var IDLE_TIMEOUT = 60;
-var _idleSecondsCounter = 0;
-document.onclick = function() {
-    _idleSecondsCounter = 0;
-};
-document.onmousemove = function() {
-    _idleSecondsCounter = 0;
-};
-document.onkeypress = function() {
-    _idleSecondsCounter = 0;
-};
-document.onscroll = function() {
-    _idleSecondsCounter = 0;
-};
+// var IDLE_TIMEOUT = 60;
+// var _idleSecondsCounter = 0;
+// document.onclick = function() {
+//     _idleSecondsCounter = 0;
+// };
+// document.onmousemove = function() {
+//     _idleSecondsCounter = 0;
+// };
+// document.onkeypress = function() {
+//     _idleSecondsCounter = 0;
+// };
+// document.onscroll = function() {
+//     _idleSecondsCounter = 0;
+// };
 
-window.setInterval(CheckIdleTime, 1000);
+// window.setInterval(CheckIdleTime, 1000);
 
-function CheckIdleTime() {
-    _idleSecondsCounter++;
-    if (_idleSecondsCounter >= IDLE_TIMEOUT) {
-        location.reload(true);
-    }
-}
+// function CheckIdleTime() {
+//     _idleSecondsCounter++;
+//     if (_idleSecondsCounter >= IDLE_TIMEOUT) {
+//         location.reload(true);
+//     }
+// }
