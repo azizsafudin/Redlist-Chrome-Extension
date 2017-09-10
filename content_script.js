@@ -1,5 +1,6 @@
 var old_scroll_top = 0;
 var viewportHeight = $(window).height();
+var latest_list = [];
 
 $(document).scroll(()=>{
 	var current_scroll_top = $(window).scrollTop();
@@ -17,12 +18,16 @@ $(document).scroll(()=>{
 
 $(document).ready(()=>{
 
-$("abbr.livetimestamp").prepend("&#9762; ");
-
+    $("abbr.livetimestamp").prepend("&#9762; ");  
+    
+    //update latest_list on ready.
+    chrome.storage.sync.get("list", function(items) {
+      latest_list = JSON.parse(items.list);
+      console.log(items.list);
+    });
 })
 
 function main(){
-
     //cosmetics
   	$("abbr.livetimestamp")
   	.attr("title", "Right click to Redlist this comment!");
@@ -48,19 +53,27 @@ function main(){
 
         var url = "https://www.facebook.com"+$(this).parent("a").attr("href");
         var new_obj = { "full_url": url.toString() }
-        var latest_list = [];
+        var push = true;
+        //loop through list to check if object already exists
+        latest_list.forEach( function(arrayItem)
+          {
+            if(arrayItem.full_url == new_obj.full_url)
+            {
+              push = false;
+            } 
+          });
 
-        chrome.storage.sync.get("list", function(items) {
-          latest_list = JSON.parse(items["list"]);
-          console.log(items["list"]);
-        });
-
+        if(push){
           latest_list.push(new_obj);
-          //console.log(latest_list);
+        }
 
         chrome.storage.sync.set({"list": JSON.stringify(latest_list)}, function() {
-        // Notify that we saved.
-          alert("SAVED URL:"+url.toString());
+          // Notify that we saved.
+          if(push){
+            alert("Redlisted URL: "+url.toString());
+          }else{
+            alert("URL already Redlisted.");
+          }
         });
         
         }
@@ -68,7 +81,8 @@ function main(){
         //middle click to get stored item.
         if(e.which == 2){
         chrome.storage.sync.get("list", function(items) {
-          alert(items["list"].toString());
+          alert(items.list.toString());
+          console.log(items.list.toString());
         });
         }       
     });
