@@ -15,31 +15,18 @@ chrome.storage.sync.get("list", function(items) {
 //update access_token.
 chrome.storage.sync.get("access_token", function(items) {
   access_token = items.access_token;
-  alert("access_token: "+access_token+" loaded");
-});
-
-
-//May or may not be working. But its not needed at the moment.
-$(document).scroll(()=>{
-	var current_scroll_top = $(window).scrollTop();
-  var scroll_delta = current_scroll_top - old_scroll_top;
-
-    //if user scrolls more than the current scroll position
-	if (current_scroll_top >= 400+old_scroll_top){
-    	main();
+  if(access_token == undefined || access_token == null || access_token == ""){
+    alert("Access Token is not set. Click on the Redlist icon in the toolbar to input your access token.");
+  }else{
+    alert("Access Token \""+access_token.substring(0,20)+"...\" is loaded.");
   }
-    
-  if(old_scroll_top <= current_scroll_top){
-    old_scroll_top = current_scroll_top;
-	}	
 });
-
 
 $(document).ready(()=>{
 
     $("abbr.livetimestamp").prepend("&#9762; ")
     .attr("title", "Click Redlist icon in the toolbar to reload!"); 
-
+    main();
 })
 
 function main(){
@@ -64,31 +51,29 @@ function main(){
 
     $("abbr.livetimestamp").mousedown(function(e){
 
-        //Middle Click
-        if(e.which == 2){
+        //Right Click
+        if(e.which == 3){
         e.preventDefault();
 
         //get URL of post/comment/reply.
         var url = "https://www.facebook.com"+$(this).parent("a").attr("href");
 
         //retrieve data from URL string.
+        //This entire block of code needs to be refactored to include other types of fb urls.
         var fb_params = processURL(url, site_name);
-
         var base_url = "https://graph.facebook.com/";
-
-        var request_str = fb_params[0];
-        
+        var request_str = fb_params[0];        
         if(fb_params[1] != null){
           request_str += "_"+fb_params[1];
         }
         if(fb_params[2] != null){
           request_str += "_"+fb_params[2];
         }
-
         var request_url = base_url+request_str+"?access_token="+access_token;
       
         $.get(request_url, function(data, status){
-            if(!status){
+            //if error object is returned.
+            if(data.error){
               alert("Unable to perform GET request.");
             }
 
@@ -99,10 +84,11 @@ function main(){
               "comment_id"        : fb_params[1],
               "reply_comment_id"  : fb_params[2],
               "name"              : data.from.name,
+              "user_id"           : data.from.id,
               "message"           : data.message,
               "created_time"      : data.created_time,
             }
-
+            var msg_str = "[RedListed] \n"+data.from.name+":\n"+data.message+"\n[RedListed]";
             //Add new_obj to list?
             var push = true;
             //loop through list to check if object already exists
@@ -121,7 +107,7 @@ function main(){
             chrome.storage.sync.set({"list": JSON.stringify(latest_list)}, function() {
               // Notify that we saved.
               if(push){
-                alert("Redlisted URL: "+url.toString());
+                alert(msg_str);
               }else{
                 alert("URL already Redlisted.");
               }
@@ -130,8 +116,8 @@ function main(){
         
         }
 
-        //right click to get stored item.
-        if(e.which == 3){
+        //Middle click to get stored item.
+        if(e.which == 2){
           retrieveList();
         }       
     });
@@ -162,10 +148,29 @@ function processURL(url_str, site){
   return arr;
 }
 
-function updateListItem(obj){        
-        
-        
-}
+// function getRedlistedUserId(user_id){
+//   latest_list.forEach(function(arrayItem){
+//     if(arrayItem.user_id == user_id){
+//       return true;
+//     }
+//     return false;
+//   });
+// }
+
+// //May or may not be working. But its not needed at the moment.
+// $(document).scroll(()=>{
+//  var current_scroll_top = $(window).scrollTop();
+//   var scroll_delta = current_scroll_top - old_scroll_top;
+
+//     //if user scrolls more than the current scroll position
+//  if (current_scroll_top >= 400+old_scroll_top){
+//      main();
+//   }
+    
+//   if(old_scroll_top <= current_scroll_top){
+//     old_scroll_top = current_scroll_top;
+//  } 
+// });
 
 //Code to reload page when idle.
 // var IDLE_TIMEOUT = 60;

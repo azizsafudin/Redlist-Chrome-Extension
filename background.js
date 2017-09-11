@@ -5,6 +5,16 @@ chrome.runtime.onInstalled.addListener(function() {
     console.log("Loaded new empty list.");
   });
 
+  alert(
+    "Welcome to RedList Chrome Extension!"+
+    "\n• Use this plugin to collect \"interesting\" comments."+
+    "\n• This plugin only works on facebook URLs containing the word \"/post/\"."+
+    "\n• This plugin requires a facebook access_token to work."+
+    "\n• Generate one at https://developers.facebook.com/tools/explorer/"+
+    "\n• Click on a comment or reply timestamp, then refresh the page."+
+    "\n• If nothing works, your token might be invalid or expired."
+    )
+
   // Replace all rules ...
   chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
     // With a new rule ...
@@ -12,7 +22,7 @@ chrome.runtime.onInstalled.addListener(function() {
       {
         conditions: [
           new chrome.declarativeContent.PageStateMatcher({
-            pageUrl: { urlContains: 'facebook.com/' },
+            pageUrl: { urlContains: 'posts/' },
           })
         ],
             // And shows the extension's page action.
@@ -30,12 +40,7 @@ chrome.pageAction.onClicked.addListener(function(tab){
       alert("Access Token saved locally.");
     });
 
-    chrome.storage.sync.get("list", function(items) {
-      latest_list = JSON.parse(items.list);
-      console.log(items.list);
-    });
-
-  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         chrome.tabs.update(tabs[0].id, {url: tabs[0].url});
     });
 });
