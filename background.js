@@ -24,6 +24,17 @@ chrome.runtime.onInstalled.addListener(function() {
 });
 
 chrome.pageAction.onClicked.addListener(function(tab){
+
+    chrome.storage.sync.set({"access_token": prompt("Insert Access Token here")}, function() {
+      // Notify that we saved.
+      alert("Access Token saved locally.");
+    });
+
+    chrome.storage.sync.get("list", function(items) {
+      latest_list = JSON.parse(items.list);
+      console.log(items.list);
+    });
+
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         chrome.tabs.update(tabs[0].id, {url: tabs[0].url});
     });

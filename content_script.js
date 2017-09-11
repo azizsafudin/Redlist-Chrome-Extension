@@ -1,10 +1,25 @@
 var old_scroll_top = 0;
 var viewportHeight = $(window).height();
 var latest_list = [];
+var access_token = "";
 
 //TODO: Set site_name from URL in tabs, not hardcoded.
 var site_name   = "facebook";
 
+//update latest_list.
+chrome.storage.sync.get("list", function(items) {
+  latest_list = JSON.parse(items.list);
+  console.log(items.list);
+});
+
+//update access_token.
+chrome.storage.sync.get("access_token", function(items) {
+  access_token = items.access_token;
+  alert("access_token: "+access_token+" loaded");
+});
+
+
+//May or may not be working. But its not needed at the moment.
 $(document).scroll(()=>{
 	var current_scroll_top = $(window).scrollTop();
   var scroll_delta = current_scroll_top - old_scroll_top;
@@ -12,24 +27,19 @@ $(document).scroll(()=>{
     //if user scrolls more than the current scroll position
 	if (current_scroll_top >= 400+old_scroll_top){
     	main();
-  	}
+  }
     
-  	if(old_scroll_top <= current_scroll_top){
+  if(old_scroll_top <= current_scroll_top){
     old_scroll_top = current_scroll_top;
 	}	
 });
 
+
 $(document).ready(()=>{
 
     $("abbr.livetimestamp").prepend("&#9762; ")
-    .attr("title", "Click Redlist icon in the toolbar to reload!");
-;  
+    .attr("title", "Click Redlist icon in the toolbar to reload!"); 
 
-    //update latest_list on ready.
-    chrome.storage.sync.get("list", function(items) {
-      latest_list = JSON.parse(items.list);
-      console.log(items.list);
-    });
 })
 
 function main(){
@@ -38,70 +48,90 @@ function main(){
   	.attr("title", "Right click to Redlist this comment!");
 
   	$("abbr.livetimestamp").hover(
-    function() {
-        var $this = $(this); // caching $(this)
-        $this.data("initialText", $this.text());
-        $this.css("color", "crimson");
-        $this.css("font-weight", "bold")
-        $this.text("Redlist it!");
-    },
-    function() {
-        var $this = $(this); // caching $(this)
-        $this.text($this.data("initialText"));
-    }
+      function() {
+          var $this = $(this); // caching $(this)
+          $this.data("initialText", $this.text());
+          $this.css("color", "crimson");
+          $this.css("font-weight", "bold")
+          $this.text("Redlist it!");
+      },
+      function() {
+          var $this = $(this); // caching $(this)
+          $this.text($this.data("initialText"));
+      }
     );
 
 
     $("abbr.livetimestamp").mousedown(function(e){
 
-        //Right Click
-        if(e.which == 3){
+        //Middle Click
+        if(e.which == 2){
         e.preventDefault();
 
         //get URL of post/comment/reply.
         var url = "https://www.facebook.com"+$(this).parent("a").attr("href");
 
         //retrieve data from URL string.
-        var fb_data = processURL(url, site_name);
+        var fb_params = processURL(url, site_name);
 
-        //constructing new object to add to the list.
-          var new_obj = { 
-            "full_url"          : url.toString(),
-            "post_id"           : fb_data[0],
-            "comment_id"        : fb_data[1],
-            "reply_comment_id"  : fb_data[2]
-          }
+        var base_url = "https://graph.facebook.com/";
 
-
-        //new_obj = clean(new_obj);
-
-        var push = true;
-        //loop through list to check if object already exists
-        latest_list.forEach(function(arrayItem)
-          {
-            if(arrayItem.full_url == new_obj.full_url)
-            {
-              push = false;
-            } 
-          });
-
-        if(push){
-          latest_list.push(new_obj);
+        var request_str = fb_params[0];
+        
+        if(fb_params[1] != null){
+          request_str += "_"+fb_params[1];
+        }
+        if(fb_params[2] != null){
+          request_str += "_"+fb_params[2];
         }
 
-        chrome.storage.sync.set({"list": JSON.stringify(latest_list)}, function() {
-          // Notify that we saved.
-          if(push){
-            alert("Redlisted URL: "+url.toString());
-          }else{
-            alert("URL already Redlisted.");
-          }
+        var request_url = base_url+request_str+"?access_token="+access_token;
+      
+        $.get(request_url, function(data, status){
+            if(!status){
+              alert("Unable to perform GET request.");
+            }
+
+            //constructing new object to add to the list.
+            var new_obj = { 
+              "full_url"          : url.toString(),
+              "post_id"           : fb_params[0],
+              "comment_id"        : fb_params[1],
+              "reply_comment_id"  : fb_params[2],
+              "name"              : data.from.name,
+              "message"           : data.message,
+              "created_time"      : data.created_time,
+            }
+
+            //Add new_obj to list?
+            var push = true;
+            //loop through list to check if object already exists
+            latest_list.forEach(function(arrayItem)
+              {
+                if(arrayItem.full_url == new_obj.full_url)
+                {
+                  //Don't add new_obj to list.
+                  push = false;
+                } 
+              });
+
+            if(push){
+              latest_list.push(new_obj);
+            }
+            chrome.storage.sync.set({"list": JSON.stringify(latest_list)}, function() {
+              // Notify that we saved.
+              if(push){
+                alert("Redlisted URL: "+url.toString());
+              }else{
+                alert("URL already Redlisted.");
+              }
+            });
         });
         
         }
 
-        //middle click to get stored item.
-        if(e.which == 2){
+        //right click to get stored item.
+        if(e.which == 3){
           retrieveList();
         }       
     });
@@ -130,6 +160,11 @@ function processURL(url_str, site){
     return arr;
   }
   return arr;
+}
+
+function updateListItem(obj){        
+        
+        
 }
 
 //Code to reload page when idle.
