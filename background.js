@@ -1,19 +1,45 @@
+var whitelistUrl = ["https://www.facebook.com/*", "http://www.facebook.com/*", "*://facebook.com/*/posts/*"];
+var startMsg =      "Welcome to RedList Chrome Extension!"+
+                    "\n• Use this plugin to collect \"interesting\" comments."+
+                    "\n• Right click to view options."+
+                    "\n• This plugin only works on facebook posts URLs containing \"/post/\"."+
+                    "\n• This plugin requires a facebook access_token to work."+
+                    "\n• Generate one at https://developers.facebook.com/tools/explorer/"+
+                    "\n• Click on a comment or reply timestamp, then refresh the page."+
+                    "\n• If nothing works, your token might be invalid or expired.";
+
+var getTokenURL = "https://developers.facebook.com/tools/explorer/";
+
+
 // When the extension is installed or upgraded ...
 chrome.runtime.onInstalled.addListener(function() {
-  
-  chrome.storage.sync.set({"list": []}, function() {
-    console.log("Loaded new empty list.");
-  });
 
-  alert(
-    "Welcome to RedList Chrome Extension!"+
-    "\n• Use this plugin to collect \"interesting\" comments."+
-    "\n• This plugin only works on facebook URLs containing the word \"/post/\"."+
-    "\n• This plugin requires a facebook access_token to work."+
-    "\n• Generate one at https://developers.facebook.com/tools/explorer/"+
-    "\n• Click on a comment or reply timestamp, then refresh the page."+
-    "\n• If nothing works, your token might be invalid or expired."
-    )
+  // chrome.storage.sync.set({"list": []}, function() {
+  //   console.log("Loaded new empty list.");
+  // });
+
+  alert(startMsg);
+
+  //create context menu items.
+  chrome.contextMenus.create({
+    "title": "View your current Redlist",
+    "id": "viewList",
+    "documentUrlPatterns":whitelistUrl,
+    contexts:["all"], 
+  });
+  chrome.contextMenus.create({type:'separator'});
+  chrome.contextMenus.create({
+    "title": "Get an access token",
+    "id": "getToken",
+    "documentUrlPatterns":whitelistUrl,
+    contexts:["all"], 
+  });
+  chrome.contextMenus.create({
+    "title": "Load an access token",
+    "id": "loadToken",
+    "documentUrlPatterns":whitelistUrl,
+    contexts:["all"], 
+  });
 
   // Replace all rules ...
   chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
@@ -35,12 +61,35 @@ chrome.runtime.onInstalled.addListener(function() {
 
 chrome.pageAction.onClicked.addListener(function(tab){
 
-    chrome.storage.sync.set({"access_token": prompt("Insert Access Token here")}, function() {
+    alert(startMsg);
+
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.update(tabs[0].id, {url: tabs[0].url});
+    });
+});
+
+chrome.contextMenus.onClicked.addListener(function(info, tab) {
+    if (info.menuItemId === "viewList") { 
+      chrome.tabs.create({ url: "index.html" });
+    }
+
+    if (info.menuItemId === "getToken") {
+      chrome.tabs.create({ url: getTokenURL });
+    }
+    if (info.menuItemId === "loadToken") {
+      var access_token = prompt("Insert Access Token here")
+      chrome.storage.sync.set({"access_token": access_token}, function() {
       // Notify that we saved.
-      alert("Access Token saved locally.");
+      if(access_token == null || access_token == ""){
+        alert("Empty field. No token saved.")
+      }else{
+        alert("Access Token saved locally.");
+      }
     });
 
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         chrome.tabs.update(tabs[0].id, {url: tabs[0].url});
     });
+
+    }
 });

@@ -2,6 +2,7 @@ var old_scroll_top = 0;
 var viewportHeight = $(window).height();
 var latest_list = [];
 var access_token = "";
+var access_token_set = false;
 
 //TODO: Set site_name from URL in tabs, not hardcoded.
 var site_name   = "facebook";
@@ -16,17 +17,24 @@ chrome.storage.sync.get("list", function(items) {
 chrome.storage.sync.get("access_token", function(items) {
   access_token = items.access_token;
   if(access_token == undefined || access_token == null || access_token == ""){
-    alert("Access Token is not set. Click on the Redlist icon in the toolbar to input your access token.");
+    alert("Access Token is not set. \nRight click to get and load an access token."+
+    		"\nGo to: https://developers.facebook.com/tools/explorer/ to get your temporary token.");
+    access_token_set = false;
   }else{
     alert("Access Token \""+access_token.substring(0,20)+"...\" is loaded.");
+    access_token_set = true;
   }
 });
 
+
+
 $(document).ready(()=>{
 
+  if(access_token_set){
     $("abbr.livetimestamp").prepend("&#9762; ")
     .attr("title", "Click Redlist icon in the toolbar to reload!"); 
     main();
+  }
 })
 
 function main(){
@@ -55,6 +63,8 @@ function main(){
         if(e.which == 3){
         e.preventDefault();
 
+        //TODO: Move this to a separate function
+
         //get URL of post/comment/reply.
         var url = "https://www.facebook.com"+$(this).parent("a").attr("href");
 
@@ -72,11 +82,6 @@ function main(){
         var request_url = base_url+request_str+"?access_token="+access_token;
       
         $.get(request_url, function(data, status){
-            //if error object is returned.
-            if(data.error){
-              alert("Unable to perform GET request.");
-            }
-
             //constructing new object to add to the list.
             var new_obj = { 
               "full_url"          : url.toString(),
