@@ -14,7 +14,7 @@ var getTokenURL = "https://developers.facebook.com/tools/explorer/";
 // When the extension is installed or upgraded ...
 chrome.runtime.onInstalled.addListener(function() {
 
-  //Remove this when deploying
+  //Remove this when deploying. (Resets list).
   chrome.storage.sync.set({"list": []}, function() {
     console.log("Loaded new empty list.");
   });
@@ -41,6 +41,14 @@ chrome.runtime.onInstalled.addListener(function() {
     "documentUrlPatterns":whitelistUrl,
     contexts:["all"], 
   });
+  chrome.contextMenus.create({type:'separator'});
+  chrome.contextMenus.create({
+    "title": "Credits",
+    "id": "showCredits",
+    "documentUrlPatterns":whitelistUrl,
+    contexts:["all"], 
+  });
+
 
   // Replace all rules ...
   chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
@@ -49,7 +57,7 @@ chrome.runtime.onInstalled.addListener(function() {
       {
         conditions: [
           new chrome.declarativeContent.PageStateMatcher({
-            pageUrl: { urlContains: 'posts/' },
+            pageUrl: { urlContains: 'https://facebook.com/' },
           })
         ],
             // And shows the extension's page action.
@@ -71,9 +79,11 @@ chrome.pageAction.onClicked.addListener(function(tab){
 
 chrome.contextMenus.onClicked.addListener(function(info, tab) {
     if (info.menuItemId === "viewList") { 
-      chrome.tabs.create({ url: "index.html" });
+      window.open("index.html","MainPage");
     }
-
+    if (info.menuItemId === "showCredits") { 
+      window.open("credit.html","CreditsPage");
+    }
     if (info.menuItemId === "getToken") {
       chrome.tabs.create({ url: getTokenURL });
     }

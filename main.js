@@ -1,10 +1,10 @@
 function retrieveList(){
   chrome.storage.sync.get("list", function(items) {
     console.log(items.list.toString());
-    var latest_list = JSON.parse(items.list)
-    var content = ""
+    var latest_list = JSON.parse(items.list);
+    var content = "";
 
-    latest_list.forEach(function(arrayItem){
+	latest_list.forEach(function(arrayItem){
 		content += "<div class=\"comment-item\">"+
 			"<div class=\"comment-content\">"+
 				"<a href=\"https://facebook.com/"+arrayItem.user_id+"\">"+arrayItem.name+"</a>"+
