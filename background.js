@@ -15,9 +15,9 @@ var getTokenURL = "https://developers.facebook.com/tools/explorer/";
 chrome.runtime.onInstalled.addListener(function() {
 
   //Remove this when deploying. (Resets list).
-  chrome.storage.sync.set({"list": []}, function() {
-    console.log("Loaded new empty list.");
-  });
+  // chrome.storage.sync.set({"list": []}, function() {
+  //   console.log("Loaded new empty list.");
+  // });
 
   alert(startMsg);
 
@@ -85,7 +85,7 @@ chrome.contextMenus.onClicked.addListener(function(info, tab) {
       window.open("credit.html","CreditsPage");
     }
     if (info.menuItemId === "getToken") {
-      chrome.tabs.create({ url: getTokenURL });
+      window.open(getTokenURL, "getToken");
     }
     if (info.menuItemId === "loadToken") {
       var access_token = prompt("Insert Access Token here")

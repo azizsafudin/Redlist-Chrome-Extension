@@ -3,6 +3,7 @@ var viewportHeight = $(window).height();
 var latest_list = [];
 var access_token = "";
 var access_token_set = false;
+var getTokenURL = "https://developers.facebook.com/tools/explorer/";
 
 //TODO: Set site_name from URL in tabs, not hardcoded.
 var site_name   = "facebook";
@@ -120,11 +121,6 @@ function main(){
         });
         
         }
-
-        //Middle click to get stored item.
-        if(e.which == 2){
-          retrieveList();
-        }       
     });
 }
 
@@ -143,11 +139,10 @@ function processURL(url_str, site){
   if(site == "facebook"){
   var posts_str = "posts/";
   var videos_str = "videos/";
-  var photos_str = "photos/"
-
+  var photos_str = "photos/";
+  var notes_str = "notes/";
   var split;
   var item_id;
-
   if(~url_str.indexOf(posts_str)){
     split = url_str.split(post_str)[1];
     item_id = split.split("?")[0];
@@ -160,7 +155,12 @@ function processURL(url_str, site){
     if(~url_str.indexOf(photos_str)){
     split = url_str.split(photos_str)[1];
     item_id = split.split("/")[1];
+  }else 
+    if(~url_str.indexOf(notes_str)){
+    split = url_str.split(notes_str)[1];
+    item_id = split.split("/")[2];
   }
+    alert(url_obj.searchParams.get("comment_id"))
 
     arr[0] = item_id;
     arr[1] = url_obj.searchParams.get("comment_id");

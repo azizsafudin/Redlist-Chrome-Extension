@@ -3,7 +3,7 @@
 
   "name": "The Redlist",
   "description": "Protecting our Friendly Animals",
-  "version": "0.0.2",
+  "version": "0.1.0",
   
   "icons": 
     {
@@ -30,7 +30,5 @@
       "js": ["jquery.min.js", "content_script.js"],
       "run_at": "document_end"
     }
-  ],
-  "content_security_policy": "script-src 'self' 'unsafe-eval' https://connect.facebook.net; object-src 'self'"     
-
+  ]
 }
