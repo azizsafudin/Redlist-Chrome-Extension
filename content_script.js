@@ -85,7 +85,7 @@ function main(){
             //constructing new object to add to the list.
             var new_obj = { 
               "full_url"          : url.toString(),
-              "post_id"           : fb_params[0],
+              "item_id"           : fb_params[0],
               "comment_id"        : fb_params[1],
               "reply_comment_id"  : fb_params[2],
               "name"              : data.from.name,
@@ -141,10 +141,28 @@ function processURL(url_str, site){
 
   //process URL for facebook
   if(site == "facebook"){
-    var split = url_str.split("posts/")[1];
-    var post_id = split.split("?")[0];
+  var posts_str = "posts/";
+  var videos_str = "videos/";
+  var photos_str = "photos/"
 
-    arr[0] = post_id;
+  var split;
+  var item_id;
+
+  if(~url_str.indexOf(posts_str)){
+    split = url_str.split(post_str)[1];
+    item_id = split.split("?")[0];
+  }
+  else 
+    if(~url_str.indexOf(videos_str)){
+    split = url_str.split(videos_str)[1];
+    item_id = split.split("/")[0];
+  }else 
+    if(~url_str.indexOf(photos_str)){
+    split = url_str.split(photos_str)[1];
+    item_id = split.split("/")[1];
+  }
+
+    arr[0] = item_id;
     arr[1] = url_obj.searchParams.get("comment_id");
     arr[2] = url_obj.searchParams.get("reply_comment_id");
 

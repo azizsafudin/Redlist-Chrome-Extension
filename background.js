@@ -2,11 +2,11 @@ var whitelistUrl = ["https://www.facebook.com/*", "http://www.facebook.com/*", "
 var startMsg =      "Welcome to RedList Chrome Extension!"+
                     "\n• Use this plugin to collect \"interesting\" comments."+
                     "\n• Right click to view options."+
-                    "\n• This plugin only works on facebook posts URLs containing \"/post/\"."+
                     "\n• This plugin requires a facebook access_token to work."+
                     "\n• Generate one at https://developers.facebook.com/tools/explorer/"+
                     "\n• Click on a comment or reply timestamp, then refresh the page."+
-                    "\n• If nothing works, your token might be invalid or expired.";
+                    "\n• If nothing works, your token might be invalid or expired."+
+                    "\n\nContact me: aziz@modlabs.co";
 
 var getTokenURL = "https://developers.facebook.com/tools/explorer/";
 
@@ -14,9 +14,10 @@ var getTokenURL = "https://developers.facebook.com/tools/explorer/";
 // When the extension is installed or upgraded ...
 chrome.runtime.onInstalled.addListener(function() {
 
-  // chrome.storage.sync.set({"list": []}, function() {
-  //   console.log("Loaded new empty list.");
-  // });
+  //Remove this when deploying
+  chrome.storage.sync.set({"list": []}, function() {
+    console.log("Loaded new empty list.");
+  });
 
   alert(startMsg);
 
